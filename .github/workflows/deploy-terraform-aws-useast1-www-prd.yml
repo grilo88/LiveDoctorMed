@@ -1,0 +1,38 @@
+name: Deploy > www-prd > aws > us-east-1
+
+on:
+  workflow_dispatch:  # Gatilho manual para o pipeline
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+      with:
+        ref: main
+
+    - name: Install Terraform
+      run: |
+        Invoke-WebRequest -Uri https://releases.hashicorp.com/terraform/1.9.6/terraform_1.9.6_windows_amd64.zip -OutFile terraform.zip
+        Expand-Archive terraform.zip -DestinationPath $Env:ProgramFiles\Terraform
+        Remove-Item terraform.zip
+        $env:PATH += ";C:\Program Files\Terraform"
+        terraform --version
+    
+    - name:  Run deploy-www-prd
+      env:
+        TF_VAR_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        TF_VAR_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        $env:PATH += ";C:\Program Files\Terraform"
+        cd ./environments/prod/aws/us-east-1
+
+        terraform init
+        terraform fmt -check -diff
+        terraform validate
+        terraform plan -input=false -target="module.www" -out="tfplan-aws-global-www-prd"
+        terraform apply -input=false -target="module.www" -auto-approve "tfplan-aws-global-www-prd"

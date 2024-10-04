@@ -1,0 +1,23 @@
+{
+    "blog-context" : "Nosso Blog",
+    "blog-title" : "Últimos Artigos & Notícias",
+
+    "blog-card-on" : "Em",
+    "blog-card-by" : "Por",
+    "blog-card-explore-more-button" : "Explore Mais",
+
+    "blog-card-1-title" : "Tecnologia",
+    "blog-card-1-date" : "14/04/2024",
+    "blog-card-1-author" : "Graziele S. D. Alencar",
+    "blog-card-1-caption" : "Como a Teleconsulta Revoluciona o Atendimento Médico",
+
+    "blog-card-2-title" : "Saúde",
+    "blog-card-2-date" : "14/04/2024",
+    "blog-card-2-author" : "Graziele S. D. Alencar",
+    "blog-card-2-caption" : "A Importância do Acompanhamento Psicológico na Era Digital",
+
+    "blog-card-3-title" : "Consultoria",
+    "blog-card-3-date" : "14/04/2024",
+    "blog-card-3-author" : "Graziele S. D. Alencar",
+    "blog-card-3-caption" : "Está Interessado em Maximizar as Receitas da Sua Clínica ou Hospital?"
+}

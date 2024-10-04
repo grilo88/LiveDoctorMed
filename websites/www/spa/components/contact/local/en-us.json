@@ -1,0 +1,21 @@
+{
+    "contact-context" : "Contact Us",
+    "contact-title" : "Please contact us",
+    "contact-address-title" : "Addresses",
+    "contact-address-1" : "Dover, Delaware, USA",
+    "contact-phone-title" : "Phone",
+    "contact-phone-number" : "+1 (302) 9 8447-5596",
+    "contact-email-title" : "E-mail",
+    "contact-email-text" : "service@livedoctormed.com",
+    
+    "contact-label-your-name" : "Your Name",
+    "contact-label-your-email" : "Your E-mail",
+    "contact-label-your-phone" : "You phone number",
+    "contact-label-your-protocol" : "Protocol",
+    "contact-label-your-subject" : "Subject",
+    "contact-label-your-message" : "Message",
+    
+    "contact-send-message-button" : "Send Message",
+
+    "contact-response-message-submit" : "Thank you for contacting us. We will respond to your message soon!"
+}

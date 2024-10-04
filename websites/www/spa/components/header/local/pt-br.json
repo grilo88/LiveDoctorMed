@@ -1,0 +1,14 @@
+{
+    "principal" : "Principal",
+    "pages" : "Páginas",
+
+    "home"          : { "title" : "Principal",                  "text" : "Principal" },
+    "about"         : { "title" : "Sobre Nós",                  "text" : "Sobre" },
+    "blog"          : { "title" : "Nosso Blog",                 "text" : "Blog" },
+    "contact"       : { "title" : "Fale Conosco",               "text" : "Contato" },
+    "faqs"          : { "title" : "Perguntas Frequentes",       "text" : "FAQs" },
+    "project"       : { "title" : "Nossos Projetos",            "text" : "Projetos" },
+    "team"          : { "title" : "Nossa Equipe",               "text" : "Equipe" },
+    "technology"    : { "title" : "Nossas Tecnologias",         "text" : "Tecnologia" },
+    "testimonial"   : { "title" : "Nossos Feedbacks",           "text" : "Depoimentos" }
+}

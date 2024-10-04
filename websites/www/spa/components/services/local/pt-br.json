@@ -1,0 +1,17 @@
+{
+    "services-context" : "Nossas Tecnologias",
+    "services-title": "Oferecemos as melhores tecnologias para o atendimento ao paciente",
+    "services-frame-1-title" : "Teleconsulta por Video-Conferência",
+    "services-frame-1-text" : "Este recurso permite que pacientes se conectem com médicos e especialistas de forma segura e conveniente, sem a necessidade de deslocamentos físicos.",
+    "services-frame-1-button" : "Leia Mais",
+    "services-frame-2-title" : "Agendamentos Online",
+    "services-frame-2-text" : "Agende suas consultas de forma simples com nossa interface intuitiva. Aproveite lembretes automáticos por e-mail, SMS e WhatsApp para uma experiência mais eficiente e organizada.",
+    "services-frame-2-button" : "Leia Mais",
+    "services-frame-3-title" : "Material de Apoio Especialista",
+    "services-frame-3-text" : "Acesse materiais de apoio para especialistas, incluindo quadros, jogos, testes e outros recursos, para auxiliar no atendimento, acompanhamento e tratamento dos seus pacientes.",
+    "services-frame-3-button" : "Leia Mais",
+    "services-frame-4-title" : "Ferramentas de Avaliação",
+    "services-frame-4-text" : "Aproveite nossas ferramentas de avaliação especializadas para ajudar os profissionais a realizar diagnósticos precisos e a personalizar o tratamento de seus clientes.",
+    "services-frame-4-button" : "Leia Mais",
+    "services-button-more-feature" : "Mais Recursos"
+}
