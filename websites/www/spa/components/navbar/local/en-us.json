@@ -1,0 +1,13 @@
+{
+    "nav-home" : "Home",
+    "nav-about" : "About",
+    "nav-technology" : "Technology",
+    "nav-project" : "Project",
+    "nav-pages" : "Pages",
+    "nav-blog" : "Our Blog",
+    "nav-team" : "Our Team",
+    "nav-testimonial" : "Feedbacks",
+    "nav-faqs" : "FAQ",
+    "nav-contact" : "Contact",
+    "nav-login" : "Login"
+}

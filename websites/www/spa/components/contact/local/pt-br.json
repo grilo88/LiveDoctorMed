@@ -1,0 +1,21 @@
+{
+    "contact-context" : "Fale Conosco",
+    "contact-title" : "Entre Em Contato",
+    "contact-address-title" : "Endereços",
+    "contact-address-1" : "Aparecida de Goiânia, Goiás, Brasil",
+    "contact-phone-title" : "Celular",
+    "contact-phone-number" : "+55 (62) 9 9544-8050",
+    "contact-email-title" : "E-mail",
+    "contact-email-text" : "atendimento@livedoctormed.com",
+    
+    "contact-label-your-name" : "Seu Nome",
+    "contact-label-your-email" : "Seu E-mail",
+    "contact-label-your-phone" : "Seu Telefone",
+    "contact-label-your-protocol" : "Protocolo",
+    "contact-label-your-subject" : "Assunto ou Motivo",
+    "contact-label-your-message" : "Mensagem",
+    
+    "contact-send-message-button" : "Enviar Mensagem",
+
+    "contact-response-message-submit" : "Obrigado por entrar em contato conosco. Em breve responderemos sua mensagem!"
+}

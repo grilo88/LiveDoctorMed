@@ -1,0 +1,17 @@
+{
+    "services-context" : "Our Technologies",
+    "services-title": "We offer the best technologies for patient care",
+    "services-frame-1-title" : "Telemedicine via Video Conference",
+    "services-frame-1-text" : "This feature allows patients to connect with doctors and specialists safely and conveniently, without the need for physical travel.",
+    "services-frame-1-button" : "Read More",
+    "services-frame-2-title" : "Online Appointments",
+    "services-frame-2-text" : "Schedule your appointments simply with our intuitive interface. Take advantage of automatic reminders via email, SMS and WhatsApp for a more efficient and organized experience.",
+    "services-frame-2-button" : "Read More",
+    "services-frame-3-title" : "Specialist Support Material",
+    "services-frame-3-text" : "Access support materials for specialists, including tables, games, tests and other resources, to assist in the care, monitoring and treatment of your patients.",
+    "services-frame-3-button" : "Read More",
+    "services-frame-4-title" : "Assessment Tools",
+    "services-frame-4-text" : "Take advantage of our specialized assessment tools to help professionals make accurate diagnoses and personalize treatment for their clients.",
+    "services-frame-4-button" : "Read More",
+    "services-button-more-feature" : "More Features"
+}

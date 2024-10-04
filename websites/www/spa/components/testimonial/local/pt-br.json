@@ -1,0 +1,18 @@
+{
+    "feedbacks-context" : "Nossos Feedbacks",
+    "feedbacks-title" : "O que os clientes estão dizendo",
+    "feedbacks-text" : "Recebemos feedbacks extremamente positivos de nossos clientes. Muitos destacam a qualidade do atendimento e a facilidade de uso da nossa plataforma.",
+    "feedbacks-button-read-all-comments" : "Ler Todos os Comentários",
+
+    "feedbacks-card-1-comment" : "A plataforma LiveDoctorMed tem sido uma ferramenta essencial no meu trabalho. A interface é intuitiva, o que facilita tanto para mim quanto para meus pacientes. As teleconsultas são tão eficazes quanto as presenciais, e muitos dos meus clientes comentam sobre a conveniência de poder receber atendimento no conforto de suas casas. Recomendo sem hesitar!",
+    "feedbacks-card-1-name" : "Dra. Renata Lima",
+    "feedbacks-card-1-position" : "Psicóloga",
+
+    "feedbacks-card-2-comment" : "A LiveDoctorMed revolucionou a maneira como atendo meus pacientes. A facilidade de marcar consultas online e a qualidade das videochamadas tornaram o acompanhamento contínuo muito mais eficiente. Meus pacientes elogiam a praticidade e eu consigo manter um controle mais rígido das suas condições de saúde, sem comprometer a qualidade do atendimento.",
+    "feedbacks-card-2-name" : "Dra. Sabrina Almeida",
+    "feedbacks-card-2-position" : "Cardiologista",
+
+    "feedbacks-card-3-comment" : "Na LiveDoctorMed, consigo acompanhar o desenvolvimento das crianças e orientar os pais com a mesma qualidade de uma consulta presencial. A plataforma permite que eu esteja disponível para meus pacientes, mesmo em situações emergenciais, o que é crucial na pediatria. O suporte técnico é excelente, sempre pronto para resolver qualquer questão rapidamente.",
+    "feedbacks-card-3-name" : "Dr. Roberto Torres",
+    "feedbacks-card-3-position" : "Pediatra"
+}

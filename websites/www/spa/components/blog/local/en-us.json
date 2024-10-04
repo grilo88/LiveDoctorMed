@@ -1,0 +1,23 @@
+{
+    "blog-context" : "Our Blog",
+    "blog-title" : "Latest Articles & News",
+
+    "blog-card-on" : "On",
+    "blog-card-by" : "By",
+    "blog-card-explore-more-button" : "Explore More",
+
+    "blog-card-1-title" : "Technology",
+    "blog-card-1-date" : "04/14/2024",
+    "blog-card-1-author" : "Graziele S. D. Alencar",
+    "blog-card-1-caption" : "How Teleconsultation Revolutionizes Medical Care",
+
+    "blog-card-2-title" : "Health",
+    "blog-card-2-date" : "14/04/2024",
+    "blog-card-2-author" : "Graziele S. D. Alencar",
+    "blog-card-2-caption" : "The Importance of Psychological Support in the Digital Age",
+
+    "blog-card-3-title" : "Consultancy",
+    "blog-card-3-date" : "14/04/2024",
+    "blog-card-3-author" : "Graziele S. D. Alencar",
+    "blog-card-3-caption" : "Are You Interested in Maximizing Your Clinic or Hospital's Revenue?"
+}
