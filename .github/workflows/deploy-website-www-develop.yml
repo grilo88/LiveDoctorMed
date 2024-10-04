@@ -33,9 +33,10 @@ jobs:
 
     - name: Deploy to S3
       run: |
+        cd ./websites/www
         aws s3 sync . s3://ldm-useast1-dev-www-livedoctormed.com --delete --exclude ".git/*" --exclude ".github/*" --acl public-read
 
     - name: Invalidate CloudFront Cache
       if: success()
       run: |
-        aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID_DEV }} --paths "/*"
+        aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID_WWW_DEV }} --paths "/*"
