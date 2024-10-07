@@ -1,4 +1,4 @@
-name: Deploy > www-prd > aws > us-east-1
+name: Deploy > aws > us-east-1 > www-prd
 
 on:
   workflow_dispatch:  # Gatilho manual para o pipeline
