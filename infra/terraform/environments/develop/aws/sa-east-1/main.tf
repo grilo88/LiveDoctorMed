@@ -1,5 +1,5 @@
 module "www" {
-  source     = "../../../../modules/aws-cloud/www.livedoctormed.com"
+  source     = "../../../../modules/aws-cloud/www"
   region     = var.region
   access_key = var.access_key
   secret_key = var.secret_key
@@ -9,7 +9,7 @@ module "www" {
 }
 
 module "meet" {
-  source            = "../../../../modules/aws-cloud/meet.livedoctormed.com"
+  source            = "../../../../modules/aws-cloud/meet"
   region            = var.region
   access_key        = var.access_key
   secret_key        = var.secret_key
@@ -21,7 +21,7 @@ module "meet" {
 }
 
 module "route-meet-to-sa-east-1" {
-  source            = "../../../../modules/aws-cloud/meet.livedoctormed.com/route-to-sa-east-1"
+  source            = "../../../../modules/aws-cloud/meet/route-to-sa-east-1"
   region            = var.region
   access_key        = var.access_key
   secret_key        = var.secret_key

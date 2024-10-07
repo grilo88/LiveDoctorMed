@@ -1,4 +1,4 @@
-name: Deploy > meet-dev > aws > us-east-1
+name: Deploy > aws > us-east-1 > meet-dev
 
 on:
   workflow_dispatch:  # Gatilho manual para o pipeline

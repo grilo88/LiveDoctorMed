@@ -1,4 +1,4 @@
-name: Deploy www.livedoctormed.com
+name: Deploy www-prd
 
 on:
   workflow_dispatch:  # Gatilho manual para o pipeline
