@@ -1,4 +1,4 @@
-name: Deploy www-dev
+name: Deploy WebSite www-dev
 
 on:
   workflow_dispatch:  # Gatilho manual para o pipeline
