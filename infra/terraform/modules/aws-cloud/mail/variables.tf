@@ -18,12 +18,7 @@ variable "organization" {
   type = string
 }
 
-variable "www_project" {
-  description = "Project Name"
-  type        = string
-}
-
-variable "meet_project" {
+variable "project" {
   description = "Project Name"
   type        = string
 }
@@ -33,22 +28,13 @@ variable "domain" {
   type        = string
 }
 
-variable "www_subdomain" {
+variable "subdomain" {
   description = "Subdomínio do Site"
   type        = string
 }
 
-variable "meet_subdomain" {
-  description = "Subdomínio do Site"
+variable "no_reply_username" {
+  description = "Nome de usuário no-reply"
   type        = string
-}
-
-variable "meet_base_ami_id" {
-  description = "ID da imagem"
-  type        = string
-}
-
-variable "meet_web_instance_type" {
-  description = "Tipo de instância"
-  type        = string
+  default     = "no-reply"
 }

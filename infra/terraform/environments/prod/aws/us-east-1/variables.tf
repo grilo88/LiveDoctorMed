@@ -13,6 +13,11 @@ variable "secret_key" {
   type        = string
 }
 
+variable "organization" {
+  default = "Organization Name"
+  type = string
+}
+
 variable "www_project" {
   description = "Project Name"
   type        = string

@@ -1,5 +1,6 @@
 region = "sa-east-1"
 domain = "livedoctormed.com"
+organization = "LiveDoctorMed"
 
 # Www Project
 www_subdomain = "www"

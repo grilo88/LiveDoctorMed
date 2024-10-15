@@ -20,6 +20,17 @@ module "meet" {
   web_instance_type = var.meet_web_instance_type
 }
 
+module "mail" {
+  source            = "../../../../modules/aws-cloud/mail"
+  region            = var.region
+  organization      = var.organization
+  access_key        = var.access_key
+  secret_key        = var.secret_key
+  project           = var.meet_project
+  domain            = var.domain
+  subdomain         = var.meet_subdomain
+}
+
 module "route-meet-to-us-east-1" {
   source            = "../../../../modules/aws-cloud/meet/route-to-us-east-1"
   region            = var.region
