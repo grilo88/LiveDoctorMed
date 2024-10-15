@@ -31,6 +31,7 @@ resource "null_resource" "create_workmail_org" {
   # Deleta a organização quando o Terraform destroy for aplicado
   provisioner "local-exec" {
     when = destroy
+    on_failure = continue
     command = <<EOT
       aws workmail delete-organization --organization-id ${self.triggers.ORG_ALIAS} --delete-mailbox-content
     EOT
@@ -45,9 +46,10 @@ resource "null_resource" "create_workmail_user" {
     environment = {
       EMAIL_USERNAME    = var.no_reply_username
       EMAIL_PASSWORD    = random_password.no_reply_password.result
+      EMAIL_DISPLAY     = "No Reply"
     }
     command = <<EOT
-      aws workmail create-user --organization-id $(aws workmail list-organizations --query 'Organizations[0].OrganizationId' --output text) --name $EMAIL_USERNAME --display-name "No-Reply" --password '$EMAIL_PASSWORD'
+      aws workmail create-user --organization-id $(aws workmail list-organizations --query 'Organizations[0].OrganizationId' --output text) --name $EMAIL_USERNAME --display-name $EMAIL_DISPLAY --password '$EMAIL_PASSWORD'
     EOT
   }
 
@@ -59,6 +61,7 @@ resource "null_resource" "create_workmail_user" {
   # Destrói o usuário no-reply quando o Terraform destroy for aplicado
   provisioner "local-exec" {
     when    = destroy
+    on_failure = continue
     command = <<EOT
       aws workmail list-organizations --query 'Organizations[?Alias==\`${self.triggers.ORG_ALIAS}\`].OrganizationId' --output text | xargs -I {} aws workmail delete-user --organization-id {} --user-id $(aws workmail list-users --organization-id {} --query 'Users[?Name==\`${self.triggers.EMAIL_USERNAME}\`].Id' --output text)
     EOT

@@ -17,13 +17,29 @@ resource "aws_route53_record" "ses_txt" {
   records = ["v=spf1 include:amazonses.com ~all"]
 }
 
+# Registros DKIM no Route 53
 resource "aws_route53_record" "dkim_records" {
-  count   = length(aws_ses_domain_dkim.ses_dkim.dkim_tokens)
-  zone_id = local.zone_id 
-  name    = "${element(aws_ses_domain_dkim.ses_dkim.dkim_tokens, count.index)}._domainkey.${var.domain}"
+  count   = 3
+  zone_id = local.zone_id
+  name    = "${aws_ses_domain_dkim.ses_dkim.dkim_tokens[count.index]}._domainkey"
   type    = "CNAME"
   ttl     = 300
-  records = ["${element(aws_ses_domain_dkim.ses_dkim.dkim_tokens, count.index)}.dkim.amazonses.com"]
+  records = ["${aws_ses_domain_dkim.ses_dkim.dkim_tokens[count.index]}.dkim.amazonses.com"]
+
+  # Garante que os registros DKIM sejam criados após o null_resource
+  depends_on = [null_resource.wait_for_dkim]
+}
+
+# Null resource para aguardar a conclusão da criação do DKIM
+resource "null_resource" "wait_for_dkim" {
+  # Usamos um trigger que muda sempre que o DKIM é criado
+  triggers = {
+    dkim_tokens = join(",", aws_ses_domain_dkim.ses_dkim.dkim_tokens)
+  }
+
+  provisioner "local-exec" {
+    command = "echo DKIM tokens updated: ${self.triggers.dkim_tokens}"
+  }
 }
 
 resource "aws_route53_record" "dmarc_record" {
