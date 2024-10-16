@@ -10,75 +10,209 @@ resource "local_file" "workmail_user_password" {
   content  = random_password.no_reply_password.result
 }
 
-# Criação da organização WorkMail com AWS CLI
-resource "null_resource" "create_workmail_org" {
+resource "null_resource" "workmail_organization" {
+  triggers = {
+    ORG_ALIAS = var.organization
+    REGION    = var.region
+  }
+
   provisioner "local-exec" {
     when = create
     on_failure = fail
-    environment = {
-      ORG_ALIAS = var.organization
-      REGION    = var.region
-    }
+    interpreter = ["PowerShell", "-Command"]
     command = <<EOT
-      aws workmail create-organization --alias $ORG_ALIAS --region $REGION --output text
+      $orgAlias = "${self.triggers.ORG_ALIAS}"
+      $region = "${self.triggers.REGION}"
+
+      $ErrorActionPreference = "Stop"
+      $orgAlias = $orgAlias.ToLower()
+      $region = $region.ToLower()
+
+      aws workmail create-organization --alias $orgAlias --region $region --output text
+
+      while ($true) {
+        $status = aws workmail list-organizations --query "OrganizationSummaries[?Alias=='$orgAlias' && State=='Active'].State" --region $region --output text
+        if ($status -eq 'ACTIVE') {
+          Write-Host 'Workmail Organization '$orgAlias' is active!'
+          break
+        } else {
+          Start-Sleep -Seconds 1
+        }
+      }
     EOT
   }
-
-  triggers = {
-    ORG_ALIAS = var.organization
-  }
-
-  # Deleta a organização quando o Terraform destroy for aplicado
+  
   provisioner "local-exec" {
     when = destroy
     on_failure = continue
+    interpreter = ["PowerShell", "-Command"]
     command = <<EOT
-      aws workmail delete-organization --organization-id ${self.triggers.ORG_ALIAS} --delete-mailbox-content
+      $orgAlias = "${self.triggers.ORG_ALIAS}"
+      $region = "${self.triggers.REGION}"
+      
+      $ErrorActionPreference = "Stop"
+      $orgAlias = $orgAlias.ToLower()
+      $region = $region.ToLower()
+
+      $organizationId = aws workmail list-organizations --query "OrganizationSummaries[?Alias=='$orgAlias' && State=='Active'].OrganizationId" --region $region --output text
+      aws workmail delete-organization --organization-id $organizationId --force-delete --delete-directory --region $region
+
+      while ($true) {
+        $status = aws workmail list-organizations --query "OrganizationSummaries[?OrganizationId=='$organizationId'].State" --region $region --output text
+        if ($status -eq 'DELETED') {
+          Write-Host 'Workmail Organization '$orgAlias' is deleted!'
+          break
+        } else {
+          Start-Sleep -Seconds 1
+        }
+      }
     EOT
   }
 }
 
-# Cria o usuário no-reply no WorkMail com a senha aleatória
-resource "null_resource" "create_workmail_user" {
+# Criação do domínio WorkMail com AWS CLI
+resource "null_resource" "workmail_domain" {
+  triggers = {
+    ORG_ALIAS = var.organization
+    REGION    = var.region
+    EMAIL_DOMAIN    = var.domain
+  }
+
   provisioner "local-exec" {
-    when    = create
+    when = create
     on_failure = fail
-    environment = {
-      EMAIL_USERNAME    = var.no_reply_username
-      EMAIL_PASSWORD    = random_password.no_reply_password.result
-      EMAIL_DISPLAY     = "No Reply"
-    }
+    interpreter = ["PowerShell", "-Command"]
     command = <<EOT
-      aws workmail create-user --organization-id $(aws workmail list-organizations --query 'Organizations[0].OrganizationId' --output text) --name $EMAIL_USERNAME --display-name $EMAIL_DISPLAY --password '$EMAIL_PASSWORD'
+      $orgAlias = "${self.triggers.ORG_ALIAS}"
+      $region = "${self.triggers.REGION}"
+      $emailDomain = "${self.triggers.EMAIL_DOMAIN}"
+
+      $ErrorActionPreference = "Stop"
+      $orgAlias = $orgAlias.ToLower()
+      $region = $region.ToLower()
+
+      $orgId = aws workmail list-organizations --query "OrganizationSummaries[?Alias=='$orgAlias' && State=='Active'].OrganizationId" --region $region --output text
+      aws workmail register-mail-domain --organization-id $orgId --domain-name $emailDomain --region $region
+
+      while ($true) {
+        $domain = aws workmail list-mail-domains --organization-id $orgId --region $region --query "MailDomains[?DomainName=='$emailDomain'].DomainName" --output text
+        if ($domain -eq $emailDomain) {
+          Write-Host 'Workmail Domain '$emailDomain' is created!'
+          break
+        } else {
+          Start-Sleep -Seconds 1
+        }
+      }
     EOT
   }
 
+  depends_on = [ null_resource.workmail_organization ]
+}
+
+# Cria o usuário no-reply no WorkMail com a senha aleatória
+resource "null_resource" "workmail_user" {
   triggers = {
     ORG_ALIAS         = var.organization,
-    EMAIL_USERNAME    = var.no_reply_username
+    REGION            = var.region,
+    EMAIL_USERNAME    = var.no_reply_username,
+    EMAIL_PASSWORD    = random_password.no_reply_password.result,
+    EMAIL_DISPLAY     = "No Reply"
+  }
+
+  provisioner "local-exec" {
+    when    = create
+    on_failure = fail
+    interpreter = ["PowerShell", "-Command"]
+    command = <<EOT
+      $orgAlias = "${self.triggers.ORG_ALIAS}"
+      $region = "${self.triggers.REGION}"
+      $emailUsername = "${self.triggers.EMAIL_USERNAME}"
+      $emailPassword = "${self.triggers.EMAIL_PASSWORD}"
+      $emailDisplay = "${self.triggers.EMAIL_DISPLAY}"
+
+      $ErrorActionPreference = "Stop"
+      $orgAlias = $orgAlias.ToLower()
+      $region = $region.ToLower()
+
+      $orgId = aws workmail list-organizations --query "OrganizationSummaries[?Alias=='$orgAlias' && State=='Active'].OrganizationId" --region $region --output text
+      aws workmail create-user --organization-id $orgId --name $emailUsername --display-name $emailDisplay --password $emailPassword --region $region
+      $userId = aws workmail list-users --organization-id $orgId --query "Users[?Name=='$emailUsername'].Id" --region $region --output text
+
+      while ($true) {
+        $status = aws workmail list-users --organization-id $orgId --query "Users[?Id=='$userId'].State" --region $region --output text
+        if ($status -eq 'DISABLED') {
+          Write-Host 'Workmail User '$userId' is created!'
+          break
+        } else {
+          Start-Sleep -Seconds 1
+        }
+      }
+    EOT
   }
 
   # Destrói o usuário no-reply quando o Terraform destroy for aplicado
   provisioner "local-exec" {
     when    = destroy
     on_failure = continue
+    interpreter = ["PowerShell", "-Command"]
     command = <<EOT
-      aws workmail list-organizations --query 'Organizations[?Alias==\`${self.triggers.ORG_ALIAS}\`].OrganizationId' --output text | xargs -I {} aws workmail delete-user --organization-id {} --user-id $(aws workmail list-users --organization-id {} --query 'Users[?Name==\`${self.triggers.EMAIL_USERNAME}\`].Id' --output text)
+      $orgAlias = "${self.triggers.ORG_ALIAS}"
+      $region = "${self.triggers.REGION}"
+      $emailUsername = "${self.triggers.EMAIL_USERNAME}"
+
+      $ErrorActionPreference = "Stop"
+      $orgAlias = $orgAlias.ToLower()
+      $region = $region.ToLower()
+
+      $orgId = aws workmail list-organizations --query "OrganizationSummaries[?Alias=='$orgAlias' && State=='Active'].OrganizationId" --region $region --output text
+      $userId = aws workmail list-users --organization-id $orgId --query "Users[?Name=='$emailUsername'].Id" --region $region --output text
+      aws workmail delete-user --organization-id $orgId --user-id $userId --region $region --output text
     EOT
   }
 
-  depends_on = [null_resource.create_workmail_org]
+  depends_on = [null_resource.workmail_domain]
 }
 
-# Ativa a caixa de correio do usuário no WorkMail
+# # Ativa a caixa de correio do usuário no WorkMail
 resource "null_resource" "enable_user_workmail" {
+  triggers = {
+    ORG_ALIAS = var.organization
+    REGION = var.region
+    EMAIL_USERNAME = var.no_reply_username
+    EMAIL_DOMAIN = var.domain
+  }
+
   provisioner "local-exec" {
-    when = create
+    when    = create
     on_failure = fail
+    interpreter = ["PowerShell", "-Command"]
     command = <<EOT
-      aws workmail register-to-workmail --organization-id $(aws workmail list-organizations --query 'Organizations[0].OrganizationId' --output text) --entity-id $(aws workmail list-users --organization-id $(aws workmail list-organizations --query 'Organizations[0].OrganizationId' --output text) --query 'Users[?Name==\`${var.no_reply_username}\`].Id' --output text) --email ${var.no_reply_username}@${var.domain}
+      $orgAlias = "${self.triggers.ORG_ALIAS}"
+      $region = "${self.triggers.REGION}"
+      $emailUsername = "${self.triggers.EMAIL_USERNAME}"
+      $emailDomain = "${self.triggers.EMAIL_DOMAIN}"
+      $email = $emailUsername + "@" + $emailDomain
+
+      $ErrorActionPreference = "Stop"
+      $orgAlias = $orgAlias.ToLower()
+      $region = $region.ToLower()
+
+      $orgId = aws workmail list-organizations --query "OrganizationSummaries[?Alias=='$orgAlias' && State=='Active'].OrganizationId" --region $region --output text
+      $userId = aws workmail list-users --organization-id $orgId --query "Users[?Name=='$emailUsername'].Id" --region $region --output text
+
+      aws workmail register-to-work-mail --organization-id $orgId --entity-id $userId --email $email --region $region
+
+      while ($true) {
+        $status = aws workmail list-users --organization-id $orgId --query "Users[?Id=='$userId'].State" --region $region --output text
+        if ($status -eq 'ENABLED') {
+          Write-Host 'Workmail User '$userId' is enabled!'
+          break
+        } else {
+          Start-Sleep -Seconds 1
+        }
+      }
     EOT
   }
 
-  depends_on = [null_resource.create_workmail_user]
+  depends_on = [ null_resource.workmail_user ]
 }
