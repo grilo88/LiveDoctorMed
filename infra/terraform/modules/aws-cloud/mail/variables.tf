@@ -33,8 +33,11 @@ variable "subdomain" {
   type        = string
 }
 
-variable "no_reply_username" {
-  description = "Nome de usuário no-reply"
-  type        = string
-  default     = "no-reply"
+variable "workmail_users" {
+  type = list(object({
+    id      = string
+    user    = string
+    display = string
+  }))
+  description = "Lista de emails para os usuários do WorkMail"
 }

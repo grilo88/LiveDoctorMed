@@ -1,4 +1,10 @@
-resource "random_password" "no_reply_password" {
+locals {
+  workmail_users_map = { for user in var.workmail_users : user.id => user }
+}
+
+resource "random_password" "user_password" {
+  for_each = local.workmail_users_map
+
   length  = 16
   special = true
   override_special = "_%@"
@@ -6,8 +12,10 @@ resource "random_password" "no_reply_password" {
 
 # Salva a senha em um arquivo local
 resource "local_file" "workmail_user_password" {
-  filename = "${var.no_reply_username}_workmail_password.txt"
-  content  = random_password.no_reply_password.result
+  for_each = local.workmail_users_map
+
+  filename = "${each.key}_workmail_password.txt"
+  content  = random_password.user_password[each.key].result
 }
 
 resource "null_resource" "workmail_organization" {
@@ -111,12 +119,14 @@ resource "null_resource" "workmail_domain" {
 
 # Cria o usuário no-reply no WorkMail com a senha aleatória
 resource "null_resource" "workmail_user" {
+  for_each = local.workmail_users_map
+
   triggers = {
     ORG_ALIAS         = var.organization,
     REGION            = var.region,
-    EMAIL_USERNAME    = var.no_reply_username,
-    EMAIL_PASSWORD    = random_password.no_reply_password.result,
-    EMAIL_DISPLAY     = "No Reply"
+    EMAIL_USERNAME    = each.value.user,
+    EMAIL_DISPLAY     = each.value.display,
+    EMAIL_PASSWORD    = random_password.user_password[each.key].result
   }
 
   provisioner "local-exec" {
@@ -136,10 +146,9 @@ resource "null_resource" "workmail_user" {
 
       $orgId = aws workmail list-organizations --query "OrganizationSummaries[?Alias=='$orgAlias' && State=='Active'].OrganizationId" --region $region --output text
       aws workmail create-user --organization-id $orgId --name $emailUsername --display-name $emailDisplay --password $emailPassword --region $region
-      $userId = aws workmail list-users --organization-id $orgId --query "Users[?Name=='$emailUsername'].Id" --region $region --output text
 
       while ($true) {
-        $status = aws workmail list-users --organization-id $orgId --query "Users[?Id=='$userId'].State" --region $region --output text
+        $status = aws workmail list-users --organization-id $orgId --query "Users[?Name=='$emailUserName' && State=='DISABLED'].State" --region $region --output text
         if ($status -eq 'DISABLED') {
           Write-Host 'Workmail User '$userId' is created!'
           break
@@ -150,10 +159,9 @@ resource "null_resource" "workmail_user" {
     EOT
   }
 
-  # Destrói o usuário no-reply quando o Terraform destroy for aplicado
   provisioner "local-exec" {
     when    = destroy
-    on_failure = continue
+    on_failure = fail
     interpreter = ["PowerShell", "-Command"]
     command = <<EOT
       $orgAlias = "${self.triggers.ORG_ALIAS}"
@@ -165,8 +173,25 @@ resource "null_resource" "workmail_user" {
       $region = $region.ToLower()
 
       $orgId = aws workmail list-organizations --query "OrganizationSummaries[?Alias=='$orgAlias' && State=='Active'].OrganizationId" --region $region --output text
-      $userId = aws workmail list-users --organization-id $orgId --query "Users[?Name=='$emailUsername'].Id" --region $region --output text
-      aws workmail delete-user --organization-id $orgId --user-id $userId --region $region --output text
+      $userId = aws workmail list-users --organization-id $orgId --query "Users[?Name=='$emailUsername' && State=='DISABLED'].Id" --region $region --output text
+
+      if (-not $orgId -or -not $userId) {
+        throw "O ID da organização ou o ID do usuário não pode estar vazio."
+      }
+  
+      while ($true) {
+        aws workmail delete-user --organization-id $orgId --user-id $userId --region $region
+        $status = aws workmail list-users --organization-id $orgId --query "Users[?Id=='$userId'].State" --region $region --output text
+        
+        # Verifica se o usuário foi removido ou está desabilitado
+        if ($status -eq '' -or $status -eq 'DELETED') {
+            Write-Host "WorkMail User '$userId' is deleted or disabled!"
+            break
+        } else {
+            Write-Host "Waiting for user '$userId' to be deleted or disabled..."
+            Start-Sleep -Seconds 1
+        }
+    }
     EOT
   }
 
@@ -175,10 +200,12 @@ resource "null_resource" "workmail_user" {
 
 # # Ativa a caixa de correio do usuário no WorkMail
 resource "null_resource" "enable_user_workmail" {
+  for_each = local.workmail_users_map
+
   triggers = {
     ORG_ALIAS = var.organization
     REGION = var.region
-    EMAIL_USERNAME = var.no_reply_username
+    EMAIL_USERNAME = each.value.user
     EMAIL_DOMAIN = var.domain
   }
 
@@ -198,14 +225,48 @@ resource "null_resource" "enable_user_workmail" {
       $region = $region.ToLower()
 
       $orgId = aws workmail list-organizations --query "OrganizationSummaries[?Alias=='$orgAlias' && State=='Active'].OrganizationId" --region $region --output text
-      $userId = aws workmail list-users --organization-id $orgId --query "Users[?Name=='$emailUsername'].Id" --region $region --output text
-
+      $userId = aws workmail list-users --organization-id $orgId --query "Users[?Name=='$emailUsername' && State=='DISABLED'].Id" --region $region --output text
+      
       aws workmail register-to-work-mail --organization-id $orgId --entity-id $userId --email $email --region $region
 
       while ($true) {
         $status = aws workmail list-users --organization-id $orgId --query "Users[?Id=='$userId'].State" --region $region --output text
         if ($status -eq 'ENABLED') {
           Write-Host 'Workmail User '$userId' is enabled!'
+          break
+        } else {
+          Start-Sleep -Seconds 1
+        }
+      }
+    EOT
+  }
+
+provisioner "local-exec" {
+    when    = destroy
+    on_failure = fail
+    interpreter = ["PowerShell", "-Command"]
+    command = <<EOT
+      $orgAlias = "${self.triggers.ORG_ALIAS}"
+      $region = "${self.triggers.REGION}"
+      $emailUsername = "${self.triggers.EMAIL_USERNAME}"
+
+      $ErrorActionPreference = "Stop"
+      $orgAlias = $orgAlias.ToLower()
+      $region = $region.ToLower()
+
+      $orgId = aws workmail list-organizations --query "OrganizationSummaries[?Alias=='$orgAlias' && State=='Active'].OrganizationId" --region $region --output text
+      $userId = aws workmail list-users --organization-id $orgId --query "Users[?Name=='$emailUsername' && State=='ENABLED'].Id" --region $region --output text
+
+      if (-not $orgId -or -not $userId) {
+        throw "O ID da organização ou o ID do usuário não pode estar vazio."
+      }
+
+      while ($true) {
+        aws workmail deregister-from-work-mail --organization-id $orgId --entity-id $userId --region $region
+        $status = aws workmail list-users --organization-id $orgId --query "Users[?Id=='$userId'].State" --region $region --output text
+
+        if ($status -eq '' -or $status -eq 'DISABLED' -or $status -eq 'DELETED') {
+          Write-Host 'Workmail User '$userId' is disabled!'
           break
         } else {
           Start-Sleep -Seconds 1
