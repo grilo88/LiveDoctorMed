@@ -7,7 +7,8 @@ resource "random_password" "user_password" {
 
   length  = 16
   special = true
-  override_special = "_%@"
+  override_special = "_%@$&"
+  numeric = true
 }
 
 # Salva a senha em um arquivo local
@@ -101,6 +102,7 @@ resource "null_resource" "workmail_domain" {
 
       $orgId = aws workmail list-organizations --query "OrganizationSummaries[?Alias=='$orgAlias' && State=='Active'].OrganizationId" --region $region --output text
       aws workmail register-mail-domain --organization-id $orgId --domain-name $emailDomain --region $region
+      aws workmail update-default-mail-domain --organization-id $orgId --domain-name $emailDomain --region $region
 
       while ($true) {
         $domain = aws workmail list-mail-domains --organization-id $orgId --region $region --query "MailDomains[?DomainName=='$emailDomain'].DomainName" --output text
@@ -145,7 +147,7 @@ resource "null_resource" "workmail_user" {
       $region = $region.ToLower()
 
       $orgId = aws workmail list-organizations --query "OrganizationSummaries[?Alias=='$orgAlias' && State=='Active'].OrganizationId" --region $region --output text
-      aws workmail create-user --organization-id $orgId --name $emailUsername --display-name $emailDisplay --password $emailPassword --region $region
+      aws workmail create-user --organization-id $orgId --name $emailUsername --display-name $emailDisplay --password '$emailPassword' --region $region
 
       while ($true) {
         $status = aws workmail list-users --organization-id $orgId --query "Users[?Name=='$emailUserName' && State=='DISABLED'].State" --region $region --output text

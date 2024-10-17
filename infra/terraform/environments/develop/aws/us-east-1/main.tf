@@ -29,17 +29,7 @@ module "mail" {
   project           = var.meet_project
   domain            = var.domain
   subdomain         = var.meet_subdomain
-  workmail_users = [
-  {
-    id      = "no-reply"
-    user    = "no-reply"
-    display = "No Reply"
-  },
-  {
-    id      = "dmarc"
-    user    = "dmarc-reports"
-    display = "DMARC"
-  }]
+  workmail_users    = var.mail_workmail_users
 }
 
 module "route-meet-to-us-east-1" {

@@ -52,3 +52,12 @@ variable "meet_web_instance_type" {
   description = "Tipo de instância"
   type        = string
 }
+
+variable "mail_workmail_users" {
+  type = list(object({
+    id      = string
+    user    = string
+    display = string
+  }))
+  description = "Lista de emails para os usuários do WorkMail"
+}
