@@ -6,6 +6,7 @@ terraform {
     }
   }
 
+
   backend "s3" {
     bucket         = "livedoctormed-terraform-backend"
     key            = "develop/aws-useast1.tfstate"

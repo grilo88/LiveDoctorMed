@@ -21,6 +21,14 @@ provider "aws" {
   access_key = var.access_key
   secret_key = var.secret_key
   retry_mode = "adaptive"  # "legacy" or "standard"
+
+  default_tags {
+    tags = {
+      Project         = var.project
+      Subdomain       = var.subdomain
+      ProvisionedBy   = "terraform"
+    }
+  }
 }
 
 data "local_file" "route53_zone_id" {

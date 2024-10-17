@@ -15,7 +15,7 @@ resource "random_password" "user_password" {
 resource "local_file" "workmail_user_password" {
   for_each = local.workmail_users_map
 
-  filename = "${each.key}_workmail_password.txt"
+  filename = "${path.module}/email_password_${each.key}.txt"
   content  = random_password.user_password[each.key].result
 }
 
