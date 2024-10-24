@@ -33,9 +33,4 @@ mail_workmail_users = [
     id      = "suporte-01"
     user    = "suporte"
     display = "Suporte"
-  },
-  {
-    id      = "teste-01"
-    user    = "teste"
-    display = "Teste"
   }]

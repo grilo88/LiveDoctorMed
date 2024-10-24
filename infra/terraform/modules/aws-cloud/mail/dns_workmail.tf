@@ -26,18 +26,16 @@ resource "aws_route53_record" "workmail_autodiscover" {
 }
 
 locals {
-  dmarc_user = [for user in var.workmail_users : user if user.id == "dmarc"]
+  dmarc_user = [for user in var.workmail_users : user if user.id == "dmarc"][0].user
 }
 
 # Registro TXT para DMARC
 resource "aws_route53_record" "dmarc" {
-  count = length(local.dmarc_user)
-
   zone_id = local.zone_id
   name    = "_dmarc.${var.domain}"
   type    = "TXT"
   ttl     = 600
   records = [
-    "v=DMARC1; p=quarantine; rua=mailto:${local.dmarc_user[0].user}@${var.domain}; ruf=mailto:${local.dmarc_user[0].user}@${var.domain}; fo=1"
+    "v=DMARC1; p=quarantine; rua=mailto:${local.dmarc_user}@${var.domain}; ruf=mailto:${local.dmarc_user}@${var.domain}; fo=1"
   ]
 }

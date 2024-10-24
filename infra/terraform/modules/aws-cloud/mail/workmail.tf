@@ -58,7 +58,7 @@ resource "null_resource" "workmail_organization" {
     command = <<EOT
       $orgAlias = "${self.triggers.ORG_ALIAS}"
       $region = "${self.triggers.REGION}"
-      
+
       $ErrorActionPreference = "Stop"
       $orgAlias = $orgAlias.ToLower()
       $region = $region.ToLower()
@@ -66,9 +66,13 @@ resource "null_resource" "workmail_organization" {
       $organizationId = aws workmail list-organizations --query "OrganizationSummaries[?Alias=='$orgAlias' && State=='Active'].OrganizationId" --region $region --output text
       aws workmail delete-organization --organization-id $organizationId --force-delete --delete-directory --region $region
 
+      if (-not $organizationId) {
+        throw "O ID da organização não pode estar vazio."
+      }
+
       while ($true) {
         $status = aws workmail list-organizations --query "OrganizationSummaries[?OrganizationId=='$organizationId'].State" --region $region --output text
-        if ($status -eq 'DELETED') {
+        if ($status -eq '' -or $status -eq 'DELETED') {
           Write-Host 'Workmail Organization '$orgAlias' is deleted!'
           break
         } else {
@@ -163,7 +167,7 @@ resource "null_resource" "workmail_user" {
 
   provisioner "local-exec" {
     when    = destroy
-    on_failure = fail
+    on_failure = continue
     interpreter = ["PowerShell", "-Command"]
     command = <<EOT
       $orgAlias = "${self.triggers.ORG_ALIAS}"
@@ -245,7 +249,7 @@ resource "null_resource" "enable_user_workmail" {
 
 provisioner "local-exec" {
     when    = destroy
-    on_failure = fail
+    on_failure = continue
     interpreter = ["PowerShell", "-Command"]
     command = <<EOT
       $orgAlias = "${self.triggers.ORG_ALIAS}"

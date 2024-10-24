@@ -1,56 +1,20 @@
-# Variáveis para o e-mail e o usuário IAM
-variable "email_identity" {
-  default = "no-reply@livedoctormed.com"
+locals {
+  no-reply_user = [for user in var.workmail_users : user if user.id == "no-reply"][0].user
 }
 
 variable "iam_user_name" {
   default = "SES_SMTP_User"
 }
 
-# 1. Criar a identidade de e-mail no SES
 resource "aws_ses_email_identity" "email_identity" {
-  email = var.email_identity
-
+  email = "${local.no-reply_user}@${var.domain}" 
   depends_on = [ null_resource.workmail_user ]
 }
 
-resource "null_resource" "check_email_verification" {
-  provisioner "local-exec" {
-    when = create
-    interpreter = ["PowerShell", "-Command"]
-    command = <<EOT
-      $emailIdentity = "${aws_ses_email_identity.email_identity.id}"
-      $region = "${var.region}"
-
-      while ($true) {
-        $verificationStatus = (aws ses get-identity-verification-attributes --identities $emailIdentity --query "VerificationAttributes.$emailIdentity.VerificationStatus" --region $region --output text)
-
-        Write-Host "Current verification status: $verificationStatus"
-
-        if ($verificationStatus -eq "Success") {
-          Write-Host "Email verification successful!"
-          break
-        } elseif ($verificationStatus -eq "Pending") {
-          Write-Host "Email verification pending. Waiting for the verification link to be clicked..."
-        } else {
-          Write-Host "Email verification failed or unknown status: $verificationStatus"
-          break
-        }
-
-        Start-Sleep -Seconds 10  # Aguarda o intervalo definido
-      }
-    EOT
-  }
-
-  depends_on = [ aws_ses_email_identity.email_identity ]
-}
-
-# 1. Criar o usuário IAM
 resource "aws_iam_user" "ses_smtp_user" {
   name = var.iam_user_name
 }
 
-# 2. Criar uma política que permite enviar e-mails via SES
 resource "aws_iam_policy" "ses_smtp_policy" {
   name        = "SES_SMTP_Policy"
   description = "Policy to allow SES email sending"
